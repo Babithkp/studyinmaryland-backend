@@ -54,13 +54,12 @@ app.post("/", upload.any(), async (req, res) => {
 
     const response = await s3upload(req.files);
     if (response) {
-      console.log(response);
+      res.json({message: response});
     }
   } catch (err) {
     console.log(err);
   }
 
-  res.send("hello world");
 });
 
 app.get("/", (req, res) => {
