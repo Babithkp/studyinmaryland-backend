@@ -17,6 +17,7 @@ const cors_1 = __importDefault(require("cors"));
 const multer_1 = __importDefault(require("multer"));
 const client_s3_1 = require("@aws-sdk/client-s3");
 const dotenv_1 = __importDefault(require("dotenv"));
+const userController_1 = require("./controller/userController");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -60,9 +61,7 @@ app.post("/api/fileupload", upload.any(), (req, res) => __awaiter(void 0, void 0
         console.log(err);
     }
 }));
-app.post("/api/newRegistration", (req, res) => {
-    res.send(req.body);
-});
+app.post("/api/newRegistration", userController_1.createUser);
 app.get("/", (req, res) => {
     res.send("hello world");
 });

@@ -8,6 +8,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import dotenv from "dotenv";
+import { createUser } from "./controller/userController";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -62,9 +63,9 @@ app.post("/api/fileupload", upload.any(), async (req, res) => {
   }
 });
 
-app.post("/api/newRegistration", (req, res) => {
-  res.send(req.body);
-});
+app.post("/api/newRegistration", createUser);
+
+
 app.get("/", (req, res) => {
   res.send("hello world");
 });
