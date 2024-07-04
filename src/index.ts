@@ -1,4 +1,5 @@
-import express from "express";import cors from "cors";
+import express from "express";
+import cors from "cors";
 import multer from "multer";
 import { v4 as uuid } from "uuid";
 import {
@@ -16,15 +17,11 @@ app.use(cors());
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-const region = process.env.AWS_REGION 
-  const accessKeyId =process.env.AWS_ACCESS_ID 
-  const secretAccessKey  =process.env.AWS_SECRET_ACCESS_KEY
+const region = process.env.AWS_REGION;
+const accessKeyId = process.env.AWS_ACCESS_ID;
+const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
-if (
-  !region ||
-  !accessKeyId||
-  !secretAccessKey
-) {
+if (!region || !accessKeyId || !secretAccessKey) {
   throw new Error("AWS_REGION and AWS_ACCESS_ KEY must be specified");
 }
 
@@ -54,7 +51,6 @@ const s3upload = async (files: any) => {
 
 app.post("/api/fileupload", upload.any(), async (req, res) => {
   try {
-   
     const response = await s3upload(req.files);
     if (response) {
       console.log(response);
@@ -66,6 +62,9 @@ app.post("/api/fileupload", upload.any(), async (req, res) => {
   }
 });
 
+app.post("/api/newRegistration", (req, res) => {
+  res.send(req.body);
+});
 app.get("/", (req, res) => {
   res.send("hello world");
 });

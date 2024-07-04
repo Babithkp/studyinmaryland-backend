@@ -27,9 +27,7 @@ const upload = (0, multer_1.default)({ storage });
 const region = process.env.AWS_REGION;
 const accessKeyId = process.env.AWS_ACCESS_ID;
 const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-if (!region ||
-    !accessKeyId ||
-    !secretAccessKey) {
+if (!region || !accessKeyId || !secretAccessKey) {
     throw new Error("AWS_REGION and AWS_ACCESS_ KEY must be specified");
 }
 const s3upload = (files) => __awaiter(void 0, void 0, void 0, function* () {
@@ -62,6 +60,9 @@ app.post("/api/fileupload", upload.any(), (req, res) => __awaiter(void 0, void 0
         console.log(err);
     }
 }));
+app.post("/api/newRegistration", (req, res) => {
+    res.send(req.body);
+});
 app.get("/", (req, res) => {
     res.send("hello world");
 });
