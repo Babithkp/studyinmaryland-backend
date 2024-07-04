@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const multer_1 = __importDefault(require("multer"));
-const uuid_1 = require("uuid");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -25,33 +24,37 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cors_1.default)());
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
+const region = process.env.AWS_REGION;
+const accessKeyId = process.env.AWS_ACCESS_ID;
+const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+if (!region ||
+    !accessKeyId ||
+    !secretAccessKey) {
+    throw new Error("AWS_REGION and AWS_ACCESS_ KEY must be specified");
+}
 const s3upload = (files) => __awaiter(void 0, void 0, void 0, function* () {
-    if (process.env.AWS_REGION &&
-        process.env.AWS_ACCESS_ID &&
-        process.env.AWS_SECRET_ACCESS_KEY) {
-        const s3Client = new client_s3_1.S3Client({
-            region: process.env.AWS_REGION,
-            credentials: {
-                accessKeyId: process.env.AWS_ACCESS_ID,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-            },
-        });
-        const params = files.map((file) => {
-            return {
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: `uploads/${(0, uuid_1.v4)()}-${file.originalname}`,
-                Body: file.buffer,
-            };
-        });
-        return yield Promise.all(params.map((param) => s3Client.send(new client_s3_1.PutObjectCommand(param))));
-    }
+    const s3Client = new client_s3_1.S3Client({
+        region,
+        credentials: {
+            accessKeyId,
+            secretAccessKey,
+        },
+    });
+    const params = files.map((file) => {
+        return {
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: `${file.originalname}`,
+            Body: file.buffer,
+        };
+    });
+    return yield Promise.all(params.map((param) => s3Client.send(new client_s3_1.PutObjectCommand(param))));
 });
-app.post("/", upload.any(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/api/fileupload", upload.any(), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const formData = JSON.parse(req.body.data);
-        console.log(formData);
         const response = yield s3upload(req.files);
         if (response) {
+            console.log(response);
+            console.log("--------------------------------");
             res.json({ message: response });
         }
     }

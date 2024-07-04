@@ -1,5 +1,4 @@
-import express from "express";
-import cors from "cors";
+import express from "express";import cors from "cors";
 import multer from "multer";
 import { v4 as uuid } from "uuid";
 import {
@@ -17,49 +16,54 @@ app.use(cors());
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+const region = process.env.AWS_REGION 
+  const accessKeyId =process.env.AWS_ACCESS_ID 
+  const secretAccessKey  =process.env.AWS_SECRET_ACCESS_KEY
+
+if (
+  !region ||
+  !accessKeyId||
+  !secretAccessKey
+) {
+  throw new Error("AWS_REGION and AWS_ACCESS_ KEY must be specified");
+}
+
 const s3upload = async (files: any) => {
-  if (
-    process.env.AWS_REGION &&
-    process.env.AWS_ACCESS_ID &&
-    process.env.AWS_SECRET_ACCESS_KEY
-  ) {
-    const s3Client = new S3Client({
-      region: process.env.AWS_REGION,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      },
-    });
+  const s3Client = new S3Client({
+    region,
+    credentials: {
+      accessKeyId,
+      secretAccessKey,
+    },
+  });
 
-    const params = files.map((file: { originalname: any; buffer: any }) => {
-      return {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: `uploads/${uuid()}-${file.originalname}`,
-        Body: file.buffer,
-      };
-    });
+  const params = files.map((file: { originalname: any; buffer: any }) => {
+    return {
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: `${file.originalname}`,
+      Body: file.buffer,
+    };
+  });
 
-    return await Promise.all(
-      params.map((param: PutObjectCommandInput) =>
-        s3Client.send(new PutObjectCommand(param))
-      )
-    );
-  }
+  return await Promise.all(
+    params.map((param: PutObjectCommandInput) =>
+      s3Client.send(new PutObjectCommand(param))
+    )
+  );
 };
 
-app.post("/", upload.any(), async (req, res) => {
+app.post("/api/fileupload", upload.any(), async (req, res) => {
   try {
-    const formData = JSON.parse(req.body.data);
-    console.log(formData);
-
+   
     const response = await s3upload(req.files);
     if (response) {
-      res.json({message: response});
+      console.log(response);
+      console.log("--------------------------------");
+      res.json({ message: response });
     }
   } catch (err) {
     console.log(err);
   }
-
 });
 
 app.get("/", (req, res) => {
@@ -69,4 +73,3 @@ app.get("/", (req, res) => {
 app.listen(process.env.PORT, () => {
   console.log(`listening on port ${process.env.PORT}`);
 });
-
