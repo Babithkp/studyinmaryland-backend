@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.agentLogin = exports.createAgent = exports.ensureAdminExists = exports.createUser = void 0;
+exports.getAgentData = exports.getStudentData = exports.agentLogin = exports.createAgent = exports.ensureAdminExists = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
 const uuid_1 = require("uuid");
 const prisma = new client_1.PrismaClient();
@@ -168,3 +168,29 @@ const agentLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.agentLogin = agentLogin;
+const getStudentData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const student = yield prisma.user.findMany({});
+        if (student) {
+            return res.json({ student: student });
+        }
+        res.json({ error: "No students found" });
+    }
+    catch (err) {
+        console.log(err);
+    }
+});
+exports.getStudentData = getStudentData;
+const getAgentData = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const agent = yield prisma.agent.findMany({});
+        if (agent) {
+            return res.json({ agent: agent });
+        }
+        res.json({ error: "No agents found" });
+    }
+    catch (err) {
+        console.log(err);
+    }
+});
+exports.getAgentData = getAgentData;

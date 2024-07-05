@@ -157,3 +157,30 @@ export const agentLogin = async (req: Request, res: Response) => {
     console.log(err);
   }
 };
+
+
+
+export const getStudentData = async (req: Request, res: Response) => {
+  try {
+    const student = await prisma.user.findMany({});
+    if (student) {
+      return res.json({ student: student });
+    }
+    res.json({ error: "No students found" });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+
+export const getAgentData = async (req: Request, res: Response) => {
+  try {
+    const agent = await prisma.agent.findMany({});
+    if (agent) {
+      return res.json({ agent: agent });
+    }
+    res.json({ error: "No agents found" });
+  } catch (err) {
+    console.log(err);
+  }
+};
