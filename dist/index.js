@@ -16,14 +16,16 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cors_1.default)());
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
-// try {
-//   ensureAdminExists();
-// } catch (e) {
-//   console.log(e);
-// }
+try {
+    (0, userController_1.ensureAdminExists)();
+}
+catch (e) {
+    console.log(e);
+}
 app.post("/api/fileupload", upload.any(), studentController_1.studentRegistrationFileUpload);
 app.post("/api/newRegistration", userController_1.createUser);
 app.post("/api/createAgent", userController_1.createAgent);
+app.post("/api/loginAgent", userController_1.agentLogin);
 app.get("/", (req, res) => {
     res.json("hello world");
 });

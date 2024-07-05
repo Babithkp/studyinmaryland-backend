@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createAgent = exports.ensureAdminExists = exports.createUser = void 0;
+exports.agentLogin = exports.createAgent = exports.ensureAdminExists = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
 const uuid_1 = require("uuid");
 const prisma = new client_1.PrismaClient();
@@ -114,6 +114,8 @@ const createAgent = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const agentData = req.body;
     if (!agentData)
         return res.json({ error: "Invalid agent data provided" });
+    if (agentData.email === "admin@gmail.com")
+        return res.json({ error: "Invalid agent data provided" });
     try {
         const isAgentExist = yield prisma.agent.findUnique({
             where: { email: agentData.email },
@@ -137,3 +139,32 @@ const createAgent = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.createAgent = createAgent;
+const agentLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const loginDetails = req.body;
+    if (!loginDetails)
+        return res.json({ error: "Login data is required" });
+    try {
+        const isAdmin = yield prisma.admin.findUnique({
+            where: { email: loginDetails.email },
+        });
+        if (isAdmin && isAdmin.password === loginDetails.password) {
+            return res.json({ admin: "login admin" });
+        }
+        else if (isAdmin && isAdmin.password !== loginDetails.password) {
+            return res.json({ wrongPassword: "wrong password" });
+        }
+        const response = yield prisma.agent.findUnique({
+            where: { email: loginDetails.email },
+        });
+        if ((response === null || response === void 0 ? void 0 : response.password) !== loginDetails.password) {
+            return res.json({ wrongPassword: "wrong password" });
+        }
+        else {
+            return res.json({ message: "Sign in successfully" });
+        }
+    }
+    catch (err) {
+        console.log(err);
+    }
+});
+exports.agentLogin = agentLogin;
