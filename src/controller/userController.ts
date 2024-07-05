@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma } from "@prisma/client";import { Request, Response } from "express";
-
+import { v4 } from "uuid";
 const prisma = new PrismaClient();
 
 export const createUser = async (req: Request, res: Response) => {
@@ -36,7 +36,7 @@ export const createUser = async (req: Request, res: Response) => {
   }
 
   try {
-    const isExitingUser = await prisma.user.findFirst({
+    const isExitingUser = await prisma.user.findUnique({
       where: {
         email: userData.email,
       },
@@ -81,5 +81,51 @@ export const createUser = async (req: Request, res: Response) => {
     res.status(201).json(user);
   } catch (error) {
     console.error("Prisma error:", error);
+  }
+};
+
+export const ensureAdminExists = async () => {
+  const adminEmail = "admin@gmail.com";
+  const adminPassword = "admin";
+
+  const admin = await prisma.admin.findUnique({
+    where: { email: adminEmail },
+  });
+
+  if (!admin) {
+    await prisma.admin.create({
+      data: {
+        email: adminEmail,
+        password: adminPassword,
+      },
+    });
+    console.log("Admin user created");
+  } else {
+    console.log("Admin user already exists");
+  }
+};
+
+export const createAgent = async (req: Request, res: Response) => {
+  const agentData = req.body;
+  if (!agentData) return res.json({ error: "Invalid agent data provided" });
+
+  try {
+    const isAgentExist = await prisma.agent.findUnique({
+      where: { email: agentData.email },
+    });
+    if (isAgentExist) return res.json({ error: "Agent already exists" });
+    await prisma.agent.create({
+      data: {
+        name: agentData.name,
+        email: agentData.email,
+        password: agentData.password,
+        agentIpAddress: agentData.agentIpAddress,
+        agentCountry: agentData.agentCountry,
+        referralCode: v4().substring(0, 8),
+      },
+    });
+    res.json({ message: "Agent account has created" });
+  } catch (err) {
+    console.log(err);
   }
 };

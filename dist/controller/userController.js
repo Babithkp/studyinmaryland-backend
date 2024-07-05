@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUser = void 0;
+exports.createAgent = exports.ensureAdminExists = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
+const uuid_1 = require("uuid");
 const prisma = new client_1.PrismaClient();
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = req.body;
@@ -42,7 +43,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     }
     try {
-        const isExitingUser = yield prisma.user.findFirst({
+        const isExitingUser = yield prisma.user.findUnique({
             where: {
                 email: userData.email,
             },
@@ -89,3 +90,50 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.createUser = createUser;
+const ensureAdminExists = () => __awaiter(void 0, void 0, void 0, function* () {
+    const adminEmail = "admin@gmail.com";
+    const adminPassword = "admin";
+    const admin = yield prisma.admin.findUnique({
+        where: { email: adminEmail },
+    });
+    if (!admin) {
+        yield prisma.admin.create({
+            data: {
+                email: adminEmail,
+                password: adminPassword,
+            },
+        });
+        console.log("Admin user created");
+    }
+    else {
+        console.log("Admin user already exists");
+    }
+});
+exports.ensureAdminExists = ensureAdminExists;
+const createAgent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const agentData = req.body;
+    if (!agentData)
+        return res.json({ error: "Invalid agent data provided" });
+    try {
+        const isAgentExist = yield prisma.agent.findUnique({
+            where: { email: agentData.email },
+        });
+        if (isAgentExist)
+            return res.json({ error: "Agent already exists" });
+        yield prisma.agent.create({
+            data: {
+                name: agentData.name,
+                email: agentData.email,
+                password: agentData.password,
+                agentIpAddress: agentData.agentIpAddress,
+                agentCountry: agentData.agentCountry,
+                referralCode: (0, uuid_1.v4)().substring(0, 8),
+            },
+        });
+        res.json({ message: "Agent account has created" });
+    }
+    catch (err) {
+        console.log(err);
+    }
+});
+exports.createAgent = createAgent;

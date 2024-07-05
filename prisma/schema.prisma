@@ -39,11 +39,23 @@ model User {
   ieltsDocName          String?
   englishDocName        String[]
   recommendationDocName String?
+  Agent                 Agent?   @relation(fields: [agentId], references: [id])
+  agentId               String?  @db.ObjectId
 }
 
-
 model Admin {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  email String @default("admin@gmail.com")
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  email    String @unique @default("admin@gmail.com")
   password String @default("admin")
+}
+
+model Agent {
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String @unique
+  password        String
+  agentIpAddress  String
+  agentCountry    String
+  referralCode    String
+  referredStudent User[]
 }
