@@ -1,29 +1,55 @@
-import { PrismaClient, Prisma } from "@prisma/client";
-import { Request, Response } from "express";
+import { PrismaClient, Prisma } from "@prisma/client";import { Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
 export const createUser = async (req: Request, res: Response) => {
   const userData = req.body;
 
-  // Log the received userData for debugging purposes
-  console.log("Received userData:", userData);
-
-  // Validate that all required fields are present
   const requiredFields = [
-    'firstName', 'lastName', 'gender', 'address', 'town', 'state',
-    'country', 'dob', 'nationality', 'email', 'phone', 'residence',
-    'programType', 'studyProgram', 'courseStartMonth', 'courseStartYear',
-    'identityDocName', 'degreeDocName', 'academicDocName'
+    "firstName",
+    "lastName",
+    "gender",
+    "address",
+    "town",
+    "state",
+    "country",
+    "dob",
+    "nationality",
+    "email",
+    "phone",
+    "residence",
+    "programType",
+    "studyProgram",
+    "courseStartMonth",
+    "courseStartYear",
+    "identityDocName",
+    "degreeDocName",
+    "academicDocName",
   ];
-  
-  const missingFields = requiredFields.filter(field => !userData[field]);
+
+  const missingFields = requiredFields.filter((field) => !userData[field]);
 
   if (missingFields.length > 0) {
-    return res.status(400).json({ error: `Missing required fields: ${missingFields.join(', ')}` });
+    return res.json({
+      error: `Missing required fields: ${missingFields.join(", ")}`,
+    });
   }
 
   try {
+    const isExitingUser = await prisma.user.findFirst({
+      where: {
+        email: userData.email,
+      },
+    });
+
+    if (isExitingUser) {
+      console.error("Prisma error: User already exists");
+      res.json({
+        error: "user already exist",
+      });
+      return;
+    }
+
     const user = await prisma.user.create({
       data: {
         firstName: userData.firstName,
@@ -49,17 +75,11 @@ export const createUser = async (req: Request, res: Response) => {
         motivationDocName: userData.motivationDocName,
         ieltsDocName: userData.ieltsDocName,
         englishDocName: userData.englishDocName,
-        recommendationDocName: userData.recommendationDocName
+        recommendationDocName: userData.recommendationDocName,
       },
     });
     res.status(201).json(user);
   } catch (error) {
-    // Detailed error logging
-    if (error instanceof Prisma.PrismaClientValidationError) {
-      console.error("Validation error:", error.message);
-      return res.status(400).json({ error: "Validation error: " + error.message });
-    }
     console.error("Prisma error:", error);
-    res.status(500).json({ error: "An error occurred while creating the user" });
   }
 };
