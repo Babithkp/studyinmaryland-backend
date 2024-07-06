@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 import dotenv from "dotenv";
-import { agentLogin, createAgent, createUser, getAgentbyId, getAgentData, getStudentData, getStudentDetailsByAgentId  } from "./controller/userController";
+import { agentLogin, createAgent, createUser, ensureAdminExists, getAgentbyId, getAgentData, getStudentData, getStudentDetailsByAgentId, updateAgentProfileImg  } from "./controller/userController";
 import { studentRegistrationFileUpload } from "./controller/studentController";
 
 
@@ -15,14 +15,17 @@ app.use(cors());
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// try {
-//   ensureAdminExists();
-// } catch (e) {
-//   console.log(e);
-// }
+try {
+  ensureAdminExists();
+} catch (e) {
+  console.log(e);
+}
+
 
 
 app.post("/api/fileupload", upload.any(), studentRegistrationFileUpload);
+
+app.post("/api/AgentProfileUpload", upload.any(), studentRegistrationFileUpload);
 
 app.post("/api/newRegistration", createUser);
 
@@ -37,6 +40,8 @@ app.get("/api/getAgentData",getAgentData)
 app.post("/api/getSingleAgentById",getAgentbyId)
 
 app.post("/api/getUserDetailsByAgentId",getStudentDetailsByAgentId)
+
+app.post("/api/updateAgentProfileImg",updateAgentProfileImg)
 
 
 app.get("/", (req, res) => {

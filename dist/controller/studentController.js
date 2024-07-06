@@ -9,9 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.studentRegistrationFileUpload = void 0;
-const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
+exports.uploadProfileImage = exports.studentRegistrationFileUpload = void 0;
 const client_s3_1 = require("@aws-sdk/client-s3");
 const region = process.env.AWS_REGION;
 const accessKeyId = process.env.AWS_ACCESS_ID;
@@ -19,7 +17,7 @@ const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 if (!region || !accessKeyId || !secretAccessKey) {
     throw new Error("AWS_REGION and AWS_ACCESS_ KEY must be specified");
 }
-const s3upload = (files) => __awaiter(void 0, void 0, void 0, function* () {
+const s3uploadFile = (files) => __awaiter(void 0, void 0, void 0, function* () {
     const s3Client = new client_s3_1.S3Client({
         region,
         credentials: {
@@ -38,7 +36,7 @@ const s3upload = (files) => __awaiter(void 0, void 0, void 0, function* () {
 });
 const studentRegistrationFileUpload = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield s3upload(req.files);
+        const response = yield s3uploadFile(req.files);
         if (response) {
             console.log(response);
             console.log("--------------------------------");
@@ -50,3 +48,6 @@ const studentRegistrationFileUpload = (req, res) => __awaiter(void 0, void 0, vo
     }
 });
 exports.studentRegistrationFileUpload = studentRegistrationFileUpload;
+const uploadProfileImage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+});
+exports.uploadProfileImage = uploadProfileImage;

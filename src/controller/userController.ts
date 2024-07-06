@@ -1,6 +1,8 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 import { v4 } from "uuid";
+import jwt from "jsonwebtoken";
+
 const prisma = new PrismaClient();
 
 export const createUser = async (req: Request, res: Response) => {
@@ -177,7 +179,12 @@ export const agentLogin = async (req: Request, res: Response) => {
     if (response?.password !== loginDetails.password) {
       return res.json({ wrongPassword: "wrong password" });
     } else {
-      return res.json({ message: "Sign in successfully", agent: response?.id });
+      const token = jwt.sign({ userId: response?.id }, "secrcet");
+      return res.json({
+        message: "Sign in successfully",
+        agent: response?.id,
+        token: token,
+      });
     }
   } catch (err) {
     console.log(err);
@@ -223,7 +230,10 @@ export const getAgentbyId = async (req: Request, res: Response) => {
   }
 };
 
-export const getStudentDetailsByAgentId = async (req: Request, res: Response) => {
+export const getStudentDetailsByAgentId = async (
+  req: Request,
+  res: Response
+) => {
   const agentId = req.body.id;
 
   if (!agentId) return res.json({ error: "userId not provided" });
@@ -237,5 +247,22 @@ export const getStudentDetailsByAgentId = async (req: Request, res: Response) =>
     res.json(agent);
   } catch (err) {
     console.log(err);
+  }
+};
+
+export const updateAgentProfileImg = async (req: Request, res: Response) => {
+  const agentId = req.body.id;
+  const imageUrl = req.body.imageUrl;
+  if (!agentId || !imageUrl) return res.json({ error: "userId not provided" });
+  try {
+    await prisma.agent.update({
+      where: { id: agentId },
+      data: {
+        profileImageUrl: imageUrl,
+      },
+    });
+    res.json({ message: "updated successfull" });
+  } catch (err) {
+    res.json({ error: "user not found" });
   }
 };

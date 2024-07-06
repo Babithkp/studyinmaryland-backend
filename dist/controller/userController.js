@@ -8,10 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getStudentDetailsByAgentId = exports.getAgentbyId = exports.getAgentData = exports.getStudentData = exports.agentLogin = exports.createAgent = exports.ensureAdminExists = exports.createUser = void 0;
+exports.updateAgentProfileImg = exports.getStudentDetailsByAgentId = exports.getAgentbyId = exports.getAgentData = exports.getStudentData = exports.agentLogin = exports.createAgent = exports.ensureAdminExists = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
 const uuid_1 = require("uuid");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const prisma = new client_1.PrismaClient();
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userData = req.body;
@@ -183,7 +187,12 @@ const agentLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             return res.json({ wrongPassword: "wrong password" });
         }
         else {
-            return res.json({ message: "Sign in successfully", agent: response === null || response === void 0 ? void 0 : response.id });
+            const token = jsonwebtoken_1.default.sign({ userId: response === null || response === void 0 ? void 0 : response.id }, "secrcet");
+            return res.json({
+                message: "Sign in successfully",
+                agent: response === null || response === void 0 ? void 0 : response.id,
+                token: token,
+            });
         }
     }
     catch (err) {
@@ -252,3 +261,22 @@ const getStudentDetailsByAgentId = (req, res) => __awaiter(void 0, void 0, void 
     }
 });
 exports.getStudentDetailsByAgentId = getStudentDetailsByAgentId;
+const updateAgentProfileImg = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const agentId = req.body.id;
+    const imageUrl = req.body.imageUrl;
+    if (!agentId || !imageUrl)
+        return res.json({ error: "userId not provided" });
+    try {
+        yield prisma.agent.update({
+            where: { id: agentId },
+            data: {
+                profileImageUrl: imageUrl,
+            },
+        });
+        res.json({ message: "updated successfull" });
+    }
+    catch (err) {
+        res.json({ error: "user not found" });
+    }
+});
+exports.updateAgentProfileImg = updateAgentProfileImg;

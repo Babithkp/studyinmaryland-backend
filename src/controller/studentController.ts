@@ -1,7 +1,5 @@
-import { PrismaClient, Prisma } from "@prisma/client";
 import { Request, Response } from "express";
 
-const prisma = new PrismaClient();
 
 import {
   PutObjectCommand,
@@ -17,7 +15,7 @@ if (!region || !accessKeyId || !secretAccessKey) {
   throw new Error("AWS_REGION and AWS_ACCESS_ KEY must be specified");
 }
 
-const s3upload = async (files: any) => {
+const s3uploadFile = async (files: any) => {
   const s3Client = new S3Client({
     region,
     credentials: {
@@ -44,7 +42,7 @@ export const studentRegistrationFileUpload = async (
   res: Response
 ) => {
   try {
-    const response = await s3upload(req.files);
+    const response = await s3uploadFile(req.files);
     if (response) {
       console.log(response);
       console.log("--------------------------------");
@@ -54,3 +52,8 @@ export const studentRegistrationFileUpload = async (
     console.log(err);
   }
 };
+
+
+export const uploadProfileImage = async(req:Request, res: Response) =>{
+
+}
