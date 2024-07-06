@@ -58,4 +58,5 @@ model Agent {
   agentCountry    String
   referralCode    String @unique
   referredStudent User[]
+  profileImageUrl String?
 }

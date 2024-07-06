@@ -36,6 +36,33 @@ export const createUser = async (req: Request, res: Response) => {
     });
   }
 
+  const userDataToCreate = {
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    gender: userData.gender,
+    address: userData.address,
+    town: userData.town,
+    state: userData.state,
+    country: userData.country,
+    dob: userData.dob,
+    nationality: userData.nationality,
+    email: userData.email,
+    phone: userData.phone,
+    residence: userData.residence,
+    programType: userData.programType,
+    studyProgram: userData.studyProgram,
+    courseStartMonth: userData.courseStartMonth,
+    courseStartYear: userData.courseStartYear,
+    identityDocName: userData.identityDocName,
+    degreeDocName: userData.degreeDocName,
+    academicDocName: userData.academicDocName,
+    birthDocName: userData.birthDocName,
+    motivationDocName: userData.motivationDocName,
+    ieltsDocName: userData.ieltsDocName,
+    englishDocName: userData.englishDocName,
+    recommendationDocName: userData.recommendationDocName,
+  };
+
   try {
     const isExitingUser = await prisma.user.findUnique({
       where: {
@@ -50,35 +77,31 @@ export const createUser = async (req: Request, res: Response) => {
       });
       return;
     }
+    let user;
+    if (userData.referralCode) {
+      const agent = await prisma.agent.findUnique({
+        where: {
+          referralCode: userData.referralCode,
+        },
+      });
+      if (agent) {
+        user = await prisma.user.create({
+          data: {
+            ...userDataToCreate,
+            Agent: {
+              connect: {
+                id: agent.id,
+              },
+            },
+          },
+        });
+      } else {
+        user = await prisma.user.create({
+          data: userDataToCreate,
+        });
+      }
+    }
 
-    const user = await prisma.user.create({
-      data: {
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        gender: userData.gender,
-        address: userData.address,
-        town: userData.town,
-        state: userData.state,
-        country: userData.country,
-        dob: userData.dob,
-        nationality: userData.nationality,
-        email: userData.email,
-        phone: userData.phone,
-        residence: userData.residence,
-        programType: userData.programType,
-        studyProgram: userData.studyProgram,
-        courseStartMonth: userData.courseStartMonth,
-        courseStartYear: userData.courseStartYear,
-        identityDocName: userData.identityDocName,
-        degreeDocName: userData.degreeDocName,
-        academicDocName: userData.academicDocName,
-        birthDocName: userData.birthDocName,
-        motivationDocName: userData.motivationDocName,
-        ieltsDocName: userData.ieltsDocName,
-        englishDocName: userData.englishDocName,
-        recommendationDocName: userData.recommendationDocName,
-      },
-    });
     res.status(201).json(user);
   } catch (error) {
     console.error("Prisma error:", error);
@@ -148,17 +171,18 @@ export const agentLogin = async (req: Request, res: Response) => {
     const response = await prisma.agent.findUnique({
       where: { email: loginDetails.email },
     });
+    if (!response) {
+      return res.json({ userNotFound: "user not found" });
+    }
     if (response?.password !== loginDetails.password) {
       return res.json({ wrongPassword: "wrong password" });
     } else {
-      return res.json({ message: "Sign in successfully" });
+      return res.json({ message: "Sign in successfully", agent: response?.id });
     }
   } catch (err) {
     console.log(err);
   }
 };
-
-
 
 export const getStudentData = async (req: Request, res: Response) => {
   try {
@@ -172,7 +196,6 @@ export const getStudentData = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getAgentData = async (req: Request, res: Response) => {
   try {
     const agent = await prisma.agent.findMany({});
@@ -180,6 +203,38 @@ export const getAgentData = async (req: Request, res: Response) => {
       return res.json({ agent: agent });
     }
     res.json({ error: "No agents found" });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const getAgentbyId = async (req: Request, res: Response) => {
+  const agentId = req.body.id;
+
+  if (!agentId) return res.json({ error: "userId not provided" });
+  try {
+    const agent = await prisma.agent.findUnique({
+      where: { id: agentId },
+    });
+    if (!agent) return res.json({ error: "No agents found" });
+    res.json({ message: "Agent found", agent });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const getStudentDetailsByAgentId = async (req: Request, res: Response) => {
+  const agentId = req.body.id;
+
+  if (!agentId) return res.json({ error: "userId not provided" });
+  try {
+    const agent = await prisma.user.findMany({
+      where: { agentId: agentId },
+      include: {
+        Agent: true,
+      },
+    });
+    res.json(agent);
   } catch (err) {
     console.log(err);
   }

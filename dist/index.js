@@ -27,6 +27,8 @@ app.post("/api/createAgent", userController_1.createAgent);
 app.post("/api/loginAgent", userController_1.agentLogin);
 app.get("/api/getStudentData", userController_1.getStudentData);
 app.get("/api/getAgentData", userController_1.getAgentData);
+app.post("/api/getSingleAgentById", userController_1.getAgentbyId);
+app.post("/api/getUserDetailsByAgentId", userController_1.getStudentDetailsByAgentId);
 app.get("/", (req, res) => {
     res.json("hello world");
 });

@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import multer from "multer";
 import dotenv from "dotenv";
-import { agentLogin, createAgent, createUser, getAgentData, getStudentData  } from "./controller/userController";
+import { agentLogin, createAgent, createUser, getAgentbyId, getAgentData, getStudentData, getStudentDetailsByAgentId  } from "./controller/userController";
 import { studentRegistrationFileUpload } from "./controller/studentController";
 
 
@@ -33,6 +33,11 @@ app.post("/api/loginAgent",agentLogin)
 app.get("/api/getStudentData",getStudentData)
 
 app.get("/api/getAgentData",getAgentData)
+
+app.post("/api/getSingleAgentById",getAgentbyId)
+
+app.post("/api/getUserDetailsByAgentId",getStudentDetailsByAgentId)
+
 
 app.get("/", (req, res) => {
   res.json("hello world");

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAgentData = exports.getStudentData = exports.agentLogin = exports.createAgent = exports.ensureAdminExists = exports.createUser = void 0;
+exports.getStudentDetailsByAgentId = exports.getAgentbyId = exports.getAgentData = exports.getStudentData = exports.agentLogin = exports.createAgent = exports.ensureAdminExists = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
 const uuid_1 = require("uuid");
 const prisma = new client_1.PrismaClient();
@@ -42,6 +42,32 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             error: `Missing required fields: ${missingFields.join(", ")}`,
         });
     }
+    const userDataToCreate = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        gender: userData.gender,
+        address: userData.address,
+        town: userData.town,
+        state: userData.state,
+        country: userData.country,
+        dob: userData.dob,
+        nationality: userData.nationality,
+        email: userData.email,
+        phone: userData.phone,
+        residence: userData.residence,
+        programType: userData.programType,
+        studyProgram: userData.studyProgram,
+        courseStartMonth: userData.courseStartMonth,
+        courseStartYear: userData.courseStartYear,
+        identityDocName: userData.identityDocName,
+        degreeDocName: userData.degreeDocName,
+        academicDocName: userData.academicDocName,
+        birthDocName: userData.birthDocName,
+        motivationDocName: userData.motivationDocName,
+        ieltsDocName: userData.ieltsDocName,
+        englishDocName: userData.englishDocName,
+        recommendationDocName: userData.recommendationDocName,
+    };
     try {
         const isExitingUser = yield prisma.user.findUnique({
             where: {
@@ -55,34 +81,28 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             });
             return;
         }
-        const user = yield prisma.user.create({
-            data: {
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                gender: userData.gender,
-                address: userData.address,
-                town: userData.town,
-                state: userData.state,
-                country: userData.country,
-                dob: userData.dob,
-                nationality: userData.nationality,
-                email: userData.email,
-                phone: userData.phone,
-                residence: userData.residence,
-                programType: userData.programType,
-                studyProgram: userData.studyProgram,
-                courseStartMonth: userData.courseStartMonth,
-                courseStartYear: userData.courseStartYear,
-                identityDocName: userData.identityDocName,
-                degreeDocName: userData.degreeDocName,
-                academicDocName: userData.academicDocName,
-                birthDocName: userData.birthDocName,
-                motivationDocName: userData.motivationDocName,
-                ieltsDocName: userData.ieltsDocName,
-                englishDocName: userData.englishDocName,
-                recommendationDocName: userData.recommendationDocName,
-            },
-        });
+        let user;
+        if (userData.referralCode) {
+            const agent = yield prisma.agent.findUnique({
+                where: {
+                    referralCode: userData.referralCode,
+                },
+            });
+            if (agent) {
+                user = yield prisma.user.create({
+                    data: Object.assign(Object.assign({}, userDataToCreate), { Agent: {
+                            connect: {
+                                id: agent.id,
+                            },
+                        } }),
+                });
+            }
+            else {
+                user = yield prisma.user.create({
+                    data: userDataToCreate,
+                });
+            }
+        }
         res.status(201).json(user);
     }
     catch (error) {
@@ -156,11 +176,14 @@ const agentLogin = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const response = yield prisma.agent.findUnique({
             where: { email: loginDetails.email },
         });
+        if (!response) {
+            return res.json({ userNotFound: "user not found" });
+        }
         if ((response === null || response === void 0 ? void 0 : response.password) !== loginDetails.password) {
             return res.json({ wrongPassword: "wrong password" });
         }
         else {
-            return res.json({ message: "Sign in successfully" });
+            return res.json({ message: "Sign in successfully", agent: response === null || response === void 0 ? void 0 : response.id });
         }
     }
     catch (err) {
@@ -194,3 +217,38 @@ const getAgentData = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.getAgentData = getAgentData;
+const getAgentbyId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const agentId = req.body.id;
+    if (!agentId)
+        return res.json({ error: "userId not provided" });
+    try {
+        const agent = yield prisma.agent.findUnique({
+            where: { id: agentId },
+        });
+        if (!agent)
+            return res.json({ error: "No agents found" });
+        res.json({ message: "Agent found", agent });
+    }
+    catch (err) {
+        console.log(err);
+    }
+});
+exports.getAgentbyId = getAgentbyId;
+const getStudentDetailsByAgentId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const agentId = req.body.id;
+    if (!agentId)
+        return res.json({ error: "userId not provided" });
+    try {
+        const agent = yield prisma.user.findMany({
+            where: { agentId: agentId },
+            include: {
+                Agent: true,
+            },
+        });
+        res.json(agent);
+    }
+    catch (err) {
+        console.log(err);
+    }
+});
+exports.getStudentDetailsByAgentId = getStudentDetailsByAgentId;
