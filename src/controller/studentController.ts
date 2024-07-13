@@ -52,8 +52,3 @@ export const studentRegistrationFileUpload = async (
     console.log(err);
   }
 };
-
-
-export const uploadProfileImage = async(req:Request, res: Response) =>{
-
-}

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadProfileImage = exports.studentRegistrationFileUpload = void 0;
+exports.studentRegistrationFileUpload = void 0;
 const client_s3_1 = require("@aws-sdk/client-s3");
 const region = process.env.AWS_REGION;
 const accessKeyId = process.env.AWS_ACCESS_ID;
@@ -48,6 +48,3 @@ const studentRegistrationFileUpload = (req, res) => __awaiter(void 0, void 0, vo
     }
 });
 exports.studentRegistrationFileUpload = studentRegistrationFileUpload;
-const uploadProfileImage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-});
-exports.uploadProfileImage = uploadProfileImage;
