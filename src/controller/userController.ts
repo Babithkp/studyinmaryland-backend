@@ -1,5 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
-import { Request, Response } from "express";
+import { PrismaClient, Prisma } from "@prisma/client";import { Request, Response } from "express";
 import { v4 } from "uuid";
 import jwt from "jsonwebtoken";
 
@@ -28,6 +27,8 @@ export const createUser = async (req: Request, res: Response) => {
     "identityDocName",
     "degreeDocName",
     "academicDocName",
+    "credentailsDocName",
+    "birthDocName",
   ];
 
   const missingFields = requiredFields.filter((field) => !userData[field]);
@@ -58,6 +59,7 @@ export const createUser = async (req: Request, res: Response) => {
     identityDocName: userData.identityDocName,
     degreeDocName: userData.degreeDocName,
     academicDocName: userData.academicDocName,
+    credentailsDocName: userData.credentailsDocName,
     birthDocName: userData.birthDocName,
     motivationDocName: userData.motivationDocName,
     ieltsDocName: userData.ieltsDocName,
@@ -86,6 +88,7 @@ export const createUser = async (req: Request, res: Response) => {
           referralCode: userData.referralCode,
         },
       });
+
       if (agent) {
         user = await prisma.user.create({
           data: {
@@ -97,14 +100,17 @@ export const createUser = async (req: Request, res: Response) => {
             },
           },
         });
-      } else {
-        user = await prisma.user.create({
-          data: userDataToCreate,
-        });
+        res.status(201).json(user);
       }
+    } else {
+      console.log("non agent");
+
+      user = await prisma.user.create({
+        data: userDataToCreate,
+      });
+      res.status(201).json(user);
     }
 
-    res.status(201).json(user);
   } catch (error) {
     console.error("Prisma error:", error);
   }

@@ -39,6 +39,8 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         "identityDocName",
         "degreeDocName",
         "academicDocName",
+        "credentailsDocName",
+        "birthDocName",
     ];
     const missingFields = requiredFields.filter((field) => !userData[field]);
     if (missingFields.length > 0) {
@@ -66,6 +68,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         identityDocName: userData.identityDocName,
         degreeDocName: userData.degreeDocName,
         academicDocName: userData.academicDocName,
+        credentailsDocName: userData.credentailsDocName,
         birthDocName: userData.birthDocName,
         motivationDocName: userData.motivationDocName,
         ieltsDocName: userData.ieltsDocName,
@@ -100,14 +103,16 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                             },
                         } }),
                 });
-            }
-            else {
-                user = yield prisma.user.create({
-                    data: userDataToCreate,
-                });
+                res.status(201).json(user);
             }
         }
-        res.status(201).json(user);
+        else {
+            console.log("non agent");
+            user = yield prisma.user.create({
+                data: userDataToCreate,
+            });
+            res.status(201).json(user);
+        }
     }
     catch (error) {
         console.error("Prisma error:", error);

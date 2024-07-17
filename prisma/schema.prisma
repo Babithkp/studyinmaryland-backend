@@ -34,6 +34,7 @@ model User {
   identityDocName       String
   degreeDocName         String[]
   academicDocName       String[]
+  credentailsDocName    String[]
   birthDocName          String?
   motivationDocName     String?
   ieltsDocName          String?
@@ -50,13 +51,13 @@ model Admin {
 }
 
 model Agent {
-  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
   name            String
-  email           String @unique
+  email           String  @unique
   password        String
   agentIpAddress  String
   agentCountry    String
-  referralCode    String @unique
+  referralCode    String  @unique
   referredStudent User[]
   profileImageUrl String?
 }
