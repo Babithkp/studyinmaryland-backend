@@ -151,10 +151,12 @@ const createAgent = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         });
         if (isAgentExist)
             return res.json({ error: "Agent already exists" });
-        yield prisma.agent.create({
+        const agent = yield prisma.agent.create({
             data: {
                 name: agentData.name,
                 email: agentData.email,
+                address: agentData.address,
+                phone: Math.floor(agentData.phone),
                 password: agentData.password,
                 agentIpAddress: agentData.agentIpAddress,
                 agentCountry: agentData.agentCountry,

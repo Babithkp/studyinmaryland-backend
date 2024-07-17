@@ -54,6 +54,8 @@ model Agent {
   id              String  @id @default(auto()) @map("_id") @db.ObjectId
   name            String
   email           String  @unique
+  address         String
+  phone           Int
   password        String
   agentIpAddress  String
   agentCountry    String

@@ -139,6 +139,7 @@ export const ensureAdminExists = async () => {
 
 export const createAgent = async (req: Request, res: Response) => {
   const agentData = req.body;
+  
   if (!agentData) return res.json({ error: "Invalid agent data provided" });
   if (agentData.email === "admin@gmail.com")
     return res.json({ error: "Invalid agent data provided" });
@@ -148,16 +149,19 @@ export const createAgent = async (req: Request, res: Response) => {
       where: { email: agentData.email },
     });
     if (isAgentExist) return res.json({ error: "Agent already exists" });
-    await prisma.agent.create({
+    const agent = await prisma.agent.create({
       data: {
         name: agentData.name,
         email: agentData.email,
+        address: agentData.address,
+        phone: Math.floor(agentData.phone),
         password: agentData.password,
         agentIpAddress: agentData.agentIpAddress,
         agentCountry: agentData.agentCountry,
         referralCode: v4().substring(0, 8),
       },
     });
+    
     res.json({ message: "Agent account has created" });
   } catch (err) {
     console.log(err);
