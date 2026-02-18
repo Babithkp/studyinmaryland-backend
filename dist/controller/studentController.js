@@ -8,18 +8,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.studentRegistrationFileUpload = void 0;
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const client_s3_1 = require("@aws-sdk/client-s3");
-const region = process.env.AWS_REGION;
-const accessKeyId = process.env.AWS_ACCESS_ID;
-const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+const region = process.env.CLOUDFLARE_REGION;
+const accessKeyId = process.env.CLOUDFLARE_ACCESS_ID;
+const secretAccessKey = process.env.CLOUDFLARE_SECRET_ACCESS_KEY;
+const endpoint = process.env.CLOUDFLARE_ENDPOINT;
 if (!region || !accessKeyId || !secretAccessKey) {
-    throw new Error("AWS_REGION and AWS_ACCESS_ KEY must be specified");
+    throw new Error("CLOUDFLARE_REGION and CLOUDFLARE_ACCESS_ KEY must be specified");
 }
 const s3uploadFile = (files) => __awaiter(void 0, void 0, void 0, function* () {
     const s3Client = new client_s3_1.S3Client({
         region,
+        endpoint,
         credentials: {
             accessKeyId,
             secretAccessKey,
@@ -27,8 +34,8 @@ const s3uploadFile = (files) => __awaiter(void 0, void 0, void 0, function* () {
     });
     const params = files.map((file) => {
         return {
-            Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `${file.originalname}`,
+            Bucket: process.env.CLOUDFLARE_BUCKET_NAME,
+            Key: `Studienstipendium/${file.originalname}`,
             Body: file.buffer,
         };
     });

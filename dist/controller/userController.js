@@ -40,7 +40,7 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         "degreeDocName",
         "academicDocName",
         "credentailsDocName",
-        "birthDocName",
+        "dob",
     ];
     const missingFields = requiredFields.filter((field) => !userData[field]);
     if (missingFields.length > 0) {

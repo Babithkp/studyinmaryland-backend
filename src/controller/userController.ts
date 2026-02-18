@@ -28,8 +28,8 @@ export const createUser = async (req: Request, res: Response) => {
     "degreeDocName",
     "academicDocName",
     "credentailsDocName",
-    "birthDocName",
-  ];
+    "dob",
+  ];  
 
   const missingFields = requiredFields.filter((field) => !userData[field]);
 
@@ -73,6 +73,7 @@ export const createUser = async (req: Request, res: Response) => {
         email: userData.email,
       },
     });
+    
 
     if (isExitingUser) {
       console.error("Prisma error: User already exists");
@@ -104,7 +105,6 @@ export const createUser = async (req: Request, res: Response) => {
       }
     } else {
       console.log("non agent");
-
       user = await prisma.user.create({
         data: userDataToCreate,
       });
